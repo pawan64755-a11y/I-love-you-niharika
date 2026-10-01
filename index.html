@@ -8,13 +8,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Hindi&family=Hind:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --night:#120e2b; --plum:#2b1a4d; --rose:#f4a3b8; --gold:#f6d58e; --ink:#fdf0f3;
+  --night:#10081f; --plum:#3a1450; --rose:#f4a3b8; --gold:#f6d58e; --ink:#fdf0f3;
   --serif:'Tiro Devanagari Hindi',Georgia,serif; --sans:'Hind',system-ui,sans-serif;
 }
 *{box-sizing:border-box;margin:0}
 html,body{height:100%}
 body{
-  background:radial-gradient(120% 90% at 50% 0%,var(--plum),var(--night) 70%);
+  background:radial-gradient(90% 60% at 50% 105%,rgba(244,163,184,.28),transparent 70%),radial-gradient(120% 90% at 50% 0%,var(--plum),var(--night) 70%);
   color:var(--ink); font-family:var(--sans); overflow:hidden; user-select:none;
   -webkit-tap-highlight-color:transparent; cursor:pointer;
   padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
@@ -36,7 +36,18 @@ body{
 #count{position:fixed;top:calc(18px + env(safe-area-inset-top));right:20px;font-size:13px;color:var(--rose);opacity:.7}
 .heart{position:fixed;bottom:-40px;color:var(--rose);animation:rise linear forwards;pointer-events:none}
 @keyframes rise{to{transform:translateY(-115vh) rotate(25deg);opacity:0}}
-@media (prefers-reduced-motion:reduce){.scene,.scene.out,#hint,.dust i{animation:none}.heart{display:none}}
+
+.scene{text-shadow:0 0 24px rgba(244,163,184,.35)}
+.scene em{font-style:normal;color:var(--rose)}
+.scene.big{text-shadow:0 0 30px rgba(244,163,184,.7),0 0 60px rgba(244,163,184,.35);animation:in .9s cubic-bezier(.2,.7,.2,1) both,glow 2.4s ease-in-out .9s infinite}
+@keyframes glow{50%{text-shadow:0 0 44px rgba(244,163,184,1),0 0 90px rgba(246,213,142,.5)}}
+.bigheart{display:block;font-size:.7em;margin-bottom:6px;animation:beat 1.2s infinite}
+@keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.25)}30%{transform:scale(1)}45%{transform:scale(1.18)}}
+.petal{position:fixed;top:-30px;width:12px;height:16px;background:radial-gradient(circle at 30% 30%,#ffd1dc,#f4a3b8 70%);border-radius:80% 0 80% 0;opacity:.7;pointer-events:none;animation:fall linear infinite}
+@keyframes fall{to{transform:translate3d(var(--dx),110vh,0) rotate(540deg)}}
+.ripple{position:fixed;pointer-events:none;font-size:26px;transform:translate(-50%,-50%);animation:pop .9s ease-out forwards}
+@keyframes pop{to{transform:translate(-50%,-160%) scale(1.6);opacity:0}}
+@media (prefers-reduced-motion:reduce){.scene,.scene.out,#hint,.dust i,.bigheart,.petal{animation:none}.heart,.ripple{display:none}}
 </style>
 </head>
 <body>
@@ -53,18 +64,21 @@ body{
 <script>
 // ✏️ यहाँ अपना मैसेज बदल सकते हो — हर लाइन = एक नया पेज (हर टैप पर)
 const scenes = [
-  {t:"निहारिका…<small>ये सिर्फ़ तुम्हारे लिए है। हर बार टैप करती जाना।</small>"},
-  {t:"दो-ढाई साल पहले मुझे नहीं पता था कि एक इंसान मेरी पूरी दुनिया बन जाएगा।"},
-  {t:"हम दोनों के बीच मीलों की दूरी है, पर देखो — ऊपर आसमान में हमारे दो तारे हर टैप पर पास आ रहे हैं।"},
+  {t:"निहारिका…<small>ये सिर्फ़ तुम्हारे लिए है, मेरी जान। हर बार धीरे से टैप करती जाना 💗</small>"},
+  {t:"दो-ढाई साल पहले मुझे नहीं पता था कि एक इंसान मेरी <em>पूरी दुनिया</em> बन जाएगा।"},
+  {t:"हम दोनों के बीच मीलों की दूरी है, पर देखो — ऊपर आसमान में हमारे <em>दो तारे</em> हर टैप पर पास आ रहे हैं।"},
   {t:"जब तुम्हारा फ़ोन आता है, तो दिन भर की थकान एक पल में गायब हो जाती है।"},
+  {t:"तुम्हारी हँसी… वो मेरी सबसे प्यारी धुन है, जिसे मैं बार-बार सुनना चाहता हूँ।"},
   {t:"कभी-कभी तुम्हें गले लगाने का इतना मन होता है कि स्क्रीन को ही पकड़ लेता हूँ।"},
-  {t:"दूरी ने हमें कमज़ोर नहीं किया। इसने सिखाया कि प्यार का मतलब साथ रहना नहीं, साथ निभाना होता है।"},
+  {t:"रात को जब चाँद को देखता हूँ, लगता है तुम भी उसे देख रही होगी — और बस, हम पास आ जाते हैं 🌙"},
+  {t:"दूरी ने हमें कमज़ोर नहीं किया। इसने सिखाया कि प्यार का मतलब साथ रहना नहीं, <em>साथ निभाना</em> होता है।"},
   {t:"हर बार जब तुम्हारी आवाज़ सुनता हूँ, लगता है तुम यहीं मेरे पास हो।"},
+  {t:"मेरी हर सुबह तुम्हारे ख़याल से शुरू होती है, और हर रात तुम्हारी दुआ पर ख़त्म।"},
   {t:"मैं वादा करता हूँ — ये इंतज़ार बेकार नहीं जाएगा।"},
-  {t:"एक दिन ये फ़ासले मिट जाएँगे, और मैं तुम्हें कभी अकेला महसूस नहीं होने दूँगा।"},
+  {t:"एक दिन ये फ़ासले मिट जाएँगे, और मैं तुम्हारा हाथ थामकर कहूँगा — <em>\u201cअब कभी नहीं छोड़ूँगा।\u201d</em>"},
   {t:"तुम मेरी मुस्कान की वजह हो, मेरी दुआओं का जवाब हो।"},
   {t:"बस एक टैप और…<small>देखो, तारे लगभग मिलने वाले हैं ✦</small>"},
-  {t:"I Love You,<br>निहारिका ❤️<span>— हमेशा तुम्हारा, पवन</span>", big:true}
+  {t:"<span class=\"bigheart\">❤️</span>I Love You,<br>निहारिका<span>तुम मेरी ज़िंदगी हो।<br>— हमेशा सिर्फ़ तुम्हारा, पवन</span>", big:true}
 ];
 
 const stage=document.getElementById('stage'), hint=document.getElementById('hint'), count=document.getElementById('count');
@@ -111,6 +125,11 @@ document.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'||e.key==
 addEventListener('resize',()=>stars(Math.max(i,0)/(scenes.length-1)));
 const dust=document.getElementById('dust');
 for(let k=0;k<40;k++){const n=document.createElement('i');n.style.left=Math.random()*100+'vw';n.style.top=Math.random()*100+'vh';n.style.animationDelay=Math.random()*4+'s';dust.appendChild(n)}
+const pc=['#ffd1dc','#f4a3b8','#ffb3c6'];
+for(let k=0;k<16;k++){const e=document.createElement('div');e.className='petal';e.style.left=Math.random()*100+'vw';
+e.style.setProperty('--dx',(Math.random()*120-60)+'px');e.style.animationDuration=(9+Math.random()*8)+'s';
+e.style.animationDelay=(-Math.random()*14)+'s';e.style.transform='scale('+(.6+Math.random()*.9)+')';e.style.background='radial-gradient(circle at 30% 30%,#fff0f4,'+pc[k%3]+' 70%)';document.body.appendChild(e)}
+document.addEventListener('click',e=>{const r=document.createElement('div');r.className='ripple';r.textContent='💗';r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';document.body.appendChild(r);setTimeout(()=>r.remove(),900)});
 stars(0);next();
 </script>
 </body>
