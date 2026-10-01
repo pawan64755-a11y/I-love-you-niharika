@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>निहारिका, ये सिर्फ़ तुम्हारे लिए है</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Hindi&family=Hind:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#120e2b; --plum:#2b1a4d; --rose:#f4a3b8; --gold:#f6d58e; --ink:#fdf0f3;
+  --serif:'Tiro Devanagari Hindi',Georgia,serif; --sans:'Hind',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{
+  background:radial-gradient(120% 90% at 50% 0%,var(--plum),var(--night) 70%);
+  color:var(--ink); font-family:var(--sans); overflow:hidden; user-select:none;
+  -webkit-tap-highlight-color:transparent; cursor:pointer;
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+}
+#sky{position:fixed;inset:0;width:100%;height:100%}
+.dust i{position:fixed;width:2px;height:2px;border-radius:50%;background:var(--ink);opacity:.5;animation:tw 4s infinite}
+@keyframes tw{50%{opacity:.08}}
+#stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:0 28px}
+.scene{max-width:30ch;text-align:center;font-family:var(--serif);font-size:clamp(26px,6.4vw,38px);line-height:1.6;
+  animation:in .9s cubic-bezier(.2,.7,.2,1) both}
+.scene.out{animation:out .35s ease-in both}
+.scene small{display:block;margin-top:22px;font-family:var(--sans);font-size:16px;color:var(--gold);letter-spacing:.02em}
+.scene.big{font-size:clamp(44px,13vw,84px);color:var(--rose);line-height:1.2}
+.scene.big span{display:block;font-size:.42em;color:var(--ink);margin-top:18px}
+@keyframes in{from{opacity:0;transform:translateY(26px) scale(.97);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+@keyframes out{to{opacity:0;transform:translateY(-18px);filter:blur(4px)}}
+#hint{position:fixed;left:0;right:0;bottom:calc(26px + env(safe-area-inset-bottom));text-align:center;font-size:14px;color:var(--gold);opacity:.75;animation:pulse 2s infinite}
+@keyframes pulse{50%{opacity:.25}}
+#count{position:fixed;top:calc(18px + env(safe-area-inset-top));right:20px;font-size:13px;color:var(--rose);opacity:.7}
+.heart{position:fixed;bottom:-40px;color:var(--rose);animation:rise linear forwards;pointer-events:none}
+@keyframes rise{to{transform:translateY(-115vh) rotate(25deg);opacity:0}}
+@media (prefers-reduced-motion:reduce){.scene,.scene.out,#hint,.dust i{animation:none}.heart{display:none}}
+</style>
+</head>
+<body>
+<svg id="sky" aria-hidden="true">
+  <line id="thread" stroke="#f6d58e" stroke-opacity=".35" stroke-dasharray="3 7" stroke-width="1.5"/>
+  <circle id="sP" r="7" fill="#f6d58e"/><circle id="sN" r="7" fill="#f4a3b8"/>
+  <circle id="gP" r="18" fill="#f6d58e" opacity=".15"/><circle id="gN" r="18" fill="#f4a3b8" opacity=".15"/>
+</svg>
+<div class="dust" id="dust"></div>
+<div id="count"></div>
+<main id="stage"></main>
+<div id="hint">टैप करो ✦</div>
+
+<script>
+// ✏️ यहाँ अपना मैसेज बदल सकते हो — हर लाइन = एक नया पेज (हर टैप पर)
+const scenes = [
+  {t:"निहारिका…<small>ये सिर्फ़ तुम्हारे लिए है। हर बार टैप करती जाना।</small>"},
+  {t:"दो-ढाई साल पहले मुझे नहीं पता था कि एक इंसान मेरी पूरी दुनिया बन जाएगा।"},
+  {t:"हम दोनों के बीच मीलों की दूरी है, पर देखो — ऊपर आसमान में हमारे दो तारे हर टैप पर पास आ रहे हैं।"},
+  {t:"जब तुम्हारा फ़ोन आता है, तो दिन भर की थकान एक पल में गायब हो जाती है।"},
+  {t:"कभी-कभी तुम्हें गले लगाने का इतना मन होता है कि स्क्रीन को ही पकड़ लेता हूँ।"},
+  {t:"दूरी ने हमें कमज़ोर नहीं किया। इसने सिखाया कि प्यार का मतलब साथ रहना नहीं, साथ निभाना होता है।"},
+  {t:"हर रात जब तुम्हारी आवाज़ सुनता हूँ, लगता है तुम यहीं मेरे पास हो।"},
+  {t:"मैं वादा करता हूँ — ये इंतज़ार बेकार नहीं जाएगा।"},
+  {t:"एक दिन ये फ़ासले मिट जाएँगे, और मैं तुम्हें कभी अकेला महसूस नहीं होने दूँगा।"},
+  {t:"तुम मेरी मुस्कान की वजह हो, मेरी दुआओं का जवाब हो।"},
+  {t:"बस एक टैप और…<small>देखो, तारे लगभग मिलने वाले हैं ✦</small>"},
+  {t:"I Love You,<br>निहारिका ❤️<span>— हमेशा तुम्हारा, पवन</span>", big:true}
+];
+
+const stage=document.getElementById('stage'), hint=document.getElementById('hint'), count=document.getElementById('count');
+const sP=document.getElementById('sP'), sN=document.getElementById('sN'), gP=document.getElementById('gP'), gN=document.getElementById('gN'), th=document.getElementById('thread');
+let i=-1, busy=false;
+
+function stars(p){
+  const w=innerWidth,h=innerHeight, y=h*0.2, a=w*(0.1+p*0.4), b=w*(0.9-p*0.4);
+  [[sP,gP,a],[sN,gN,b]].forEach(([s,g,x])=>{
+    s.setAttribute('cx',x);s.setAttribute('cy',y);g.setAttribute('cx',x);g.setAttribute('cy',y);
+    s.style.transition=g.style.transition='all .9s ease';
+  });
+  th.setAttribute('x1',a);th.setAttribute('x2',b);th.setAttribute('y1',y);th.setAttribute('y2',y);
+  th.style.transition='all .9s ease';
+  if(p>=1){gP.setAttribute('r',44);gN.setAttribute('r',44);th.setAttribute('stroke-opacity',0)}
+}
+function hearts(){
+  for(let k=0;k<26;k++){
+    const e=document.createElement('div');e.className='heart';e.textContent=['❤','💗','✦'][k%3];
+    e.style.left=Math.random()*100+'vw';e.style.fontSize=(14+Math.random()*26)+'px';
+    e.style.animationDuration=(4+Math.random()*5)+'s';e.style.animationDelay=(Math.random()*3)+'s';
+    document.body.appendChild(e);setTimeout(()=>e.remove(),11000);
+  }
+}
+function next(){
+  if(busy||i>=scenes.length-1)return;
+  busy=true;
+  const old=stage.firstElementChild;
+  const show=()=>{
+    i++;const s=scenes[i];
+    const d=document.createElement('div');d.className='scene'+(s.big?' big':'');d.innerHTML=s.t;
+    stage.replaceChildren(d);
+    stars(i/(scenes.length-1));
+    count.textContent=(i+1)+' / '+scenes.length;
+    if(navigator.vibrate)navigator.vibrate(i===scenes.length-1?[60,40,60]:15);
+    if(i===scenes.length-1){hint.style.display='none';hearts();setInterval(hearts,6000)}
+    else if(i===0)hint.textContent='टैप करो ✦';
+    busy=false;
+  };
+  if(old){old.classList.add('out');setTimeout(show,320)}else show();
+}
+document.addEventListener('click',next);
+document.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'||e.key==='ArrowRight')next()});
+addEventListener('resize',()=>stars(Math.max(i,0)/(scenes.length-1)));
+const dust=document.getElementById('dust');
+for(let k=0;k<40;k++){const n=document.createElement('i');n.style.left=Math.random()*100+'vw';n.style.top=Math.random()*100+'vh';n.style.animationDelay=Math.random()*4+'s';dust.appendChild(n)}
+stars(0);next();
+</script>
+</body>
+</html>
